@@ -1,0 +1,60 @@
+import socket
+import threading
+
+def handle_client(client_socket, client_address):
+    print(f"Connection from {client_address} has been established.")
+
+    while True:
+        # Receive message from client
+        message = client_socket.recv(1024).decode("utf-8")
+        if not message:
+            print(f"Connection from {client_address} has been closed.")
+            break
+        print(f"Received message from {client_address}: {message}")
+
+        # Send message to client
+        response = input("Enter your response: ")
+        client_socket.send(response.encode("utf-8"))
+
+    client_socket.close()
+
+def main():
+    host = "127.0.0.1"
+    port = 5555
+
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((host, port))
+    server.listen(5)
+
+    print(f"Server started on {host}:{port}")
+    print("thank you for using me")
+
+    while True:
+        client_socket, client_address = server.accept()
+        client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
+        client_thread.start()
+
+main()
+''' THE SECOND SERVER CODE IS BELOW'''
+import socket
+import threading
+
+def main():
+    host = "127.0.0.1"
+    port = 5555
+
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client.connect((host, port))
+
+    while True:
+        # Send message to server
+        message = input("Enter your message: ")
+        client.send(message.encode("utf-8"))
+
+        # Receive response from server
+        response = client.recv(1024).decode("utf-8")
+        print(f"Server's response: {response}")
+
+    client.close()
+
+main()
