@@ -1,0 +1,69 @@
+import speech_recognition as sr
+import pyttsx3
+import datetime
+import webbrowser
+import os
+import pickle
+
+# Initialize the speech recognizer and text-to-speech converter
+recognizer = sr.Recognizer()
+engine = pyttsx3.init()
+
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+
+def listen():
+    with sr.Microphone() as source:
+        print("Listening...")
+        recognizer.adjust_for_ambient_noise(source)
+        audio = recognizer.listen(source)
+
+        try:
+            print("Recognizing...")
+            query = recognizer.recognize_google(audio, language='en')
+            print(f"User said: {query}")
+            return query.lower()
+        except sr.UnknownValueError:
+            speak("Sorry, I didn't catch that. Can you repeat?")
+            return ""
+        except sr.RequestError:
+            speak("Sorry, I couldn't reach the Google API. Please check your internet connection.")
+            return ""
+
+def greet():
+    hour = datetime.datetime.now().hour
+    if 0 <= hour < 12:
+        speak("Good morning!")
+    elif 12 <= hour < 18:
+        speak("Good afternoon!")
+    else:
+        speak("Good evening!")
+    speak("How can I assist you today?")
+
+def main():
+    greet()
+    while True:
+        query = listen()
+        if 'hello' in query:
+            speak("Hello there!")
+        elif 'time' in query:
+            time = datetime.datetime.now().strftime("%I:%M %p")
+            speak(f"The current time is {time}.")
+        elif 'date' in query:
+            date = datetime.datetime.now().strftime("%A, %B %d, %Y")
+            speak(f"Today's date is {date}.")
+        elif 'search' in query:
+            speak("What would you like me to search for?")
+            search_query = listen()
+            if search_query:
+                url = f"https://www.google.com/search?q={search_query}"
+                webbrowser.open(url)
+        elif 'exit' in query:
+            speak("Goodbye!")
+            break
+        else:
+            speak("Sorry, I didn't understand that.")
+
+if __name__ == "__main__":
+    main()
